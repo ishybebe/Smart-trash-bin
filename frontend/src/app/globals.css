@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #ffffff;
+  --ink: #111827;
+  --muted: #6b7280;
+  --rule: #d1d5db;
+  --signal: #1e40af;
+  --intake: #10b981;
+  --caution: #f59e0b;
+  --fault: #ef4444;
+}
+
+/* Tailwind CSS v4 directive; it is intentionally not a standard CSS at-rule. */
+/* stylelint-disable-next-line at-rule-no-unknown */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-rule: var(--rule);
+  --color-signal: var(--signal);
+  --color-intake: var(--intake);
+  --color-caution: var(--caution);
+  --color-fault: var(--fault);
+  --font-display: var(--font-archivo);
+  --font-body: var(--font-plex-sans);
+  --font-data: var(--font-plex-mono);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--signal);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* The library injects its own video element into our scan bed. */
+#kiosk-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+@keyframes intake-sweep {
+  0% {
+    top: 0;
+    opacity: 0.4;
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    top: calc(100% - 2px);
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    opacity: 0.4;
+  }
+}
+
+@keyframes status-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes loader-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+.loader-segment {
+  animation: loader-sweep 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.scan-sweep {
+  animation: intake-sweep 2.6s ease-in-out infinite;
+}
+
+.status-breathe {
+  animation: status-breathe 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-sweep,
+  .status-breathe,
+  .loader-segment {
+    animation: none;
+  }
+  .scan-sweep {
+    top: 50%;
+    opacity: 0.8;
+  }
+  .loader-segment {
+    width: 100%;
+    opacity: 0.8;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  header,
+  nav,
+  button,
+  a,
+  input,
+  [role='alert'] {
+    display: none !important;
+  }
+
+  main {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  .print-report {
+    display: block !important;
+  }
+
+  .print-report section,
+  .print-report article {
+    break-inside: avoid;
+    border: 1px solid #d1d5db !important;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+
+  .print-report .print-report-actions,
+  .print-report [role='status'] {
+    display: none !important;
+  }
+}
