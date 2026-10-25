@@ -1,139 +1,157 @@
-Smart Trash Bin & Rice Vendo System
+# Smart Trash Bin & Rice Vendo System
 
 An IoT-enabled smart waste bin and rice vending system featuring real-time material identification, interactive kiosk interface, dynamic material pricing, and an administrative management dashboard.
 
-📋 Table of Contents
+## 📋 Table of Contents
 
-Prerequisites
+- [Prerequisites](#-prerequisites)
+- [Clone and Setup](#-clone-and-setup)
+- [Backend Setup](#-backend-setup)
+- [Frontend Setup & HTTPS](#-frontend-setup--https)
+- [Accepting Local Certificates](#-accepting-local-certificates)
+- [📁 Repository Structure](#-repository-structure)
+- [🛠️ Production Deployment](#-production-deployment)
 
-Clone and Setup
+---
 
-Step 1: Generate Local SSL/TLS Certificates
-
-Step 2: Backend Setup
-
-Step 3: Frontend Setup
-
-Step 4: Accepting Self-Signed Certificates
-
-📁 Repository Structure
-
-🛠️ Production Deployment
-
-📋 Prerequisites
+## 📋 Prerequisites
 
 Ensure you have the following installed on your machine before setting up the project:
 
-Node.js: v18.0.0 or higher
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
 
-npm: v9.0.0 or higher
+---
 
-OpenSSL: Pre-installed on macOS/Linux; accessible via Git Bash or OpenSSL binary on Windows.
-
-💻 Clone and Setup
+## 💻 Clone and Setup
 
 Clone the repository and open it in VS Code:
 
+```bash
 git clone <repository-url>
 cd Smart_Trash_Bin
 code .
+```
 
+---
 
-🔒 Step 1: Generate Local SSL/TLS Certificates
+## 🚀 Backend Setup
 
-Because modern browsers enforce strict Web Camera, QR Scanner, and HTTPS security restrictions, both frontend and backend must run over HTTPS during local network testing (e.g., when connecting a kiosk tablet or mobile camera via IP address).
+The REST API runs on port `4000` by default; all endpoints are mounted under `/api`.
 
-Run the following command from the project root (Smart_Trash_Bin) to generate self-signed certificates:
+1. Navigate to the `backend` directory:
+   ```bash
+   cd backend
+   ```
 
-# macOS / Linux / Git Bash (Windows)
-mkdir -p backend/certs frontend/certs
+2. Create your local environment file:
+   ```bash
+   # Linux / macOS / Git Bash
+   cp .env.example .env
 
-# Generate backend SSL certificate (replace IP with your local Wi-Fi IP if needed)
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout backend/certs/key.pem \
-  -out backend/certs/cert.pem \
-  -subj "/CN=192.168.254.156"
+   # Windows (CMD)
+   copy .env.example .env
+   ```
 
-# Copy certificates for frontend local HTTPS development
-cp backend/certs/key.pem frontend/certs/key.pem
-cp backend/certs/cert.pem frontend/certs/cert.pem
+3. Configure your `.env` settings:
+   ```env
+   PORT=4000
+   NODE_ENV=development
+   CORS_ORIGIN=https://192.168.254.156:3000
+   QR_SECRET=your_qr_hmac_secret_key
+   JWT_SECRET=your_admin_jwt_secret_key
 
+   # Database Credentials
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_USERNAME=root
+   DB_PASSWORD=your_password
+   DB_DATABASE=smart_trash_bin
+   ```
 
-🚀 Step 2: Backend Setup
+4. Install dependencies and start the development server:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-The API runs on https://localhost:4000 (or https://192.168.254.156:4000); all endpoints are mounted under /api.
+---
 
-Navigate to the backend directory:
+## 🖥️ Frontend Setup & HTTPS
 
-cd backend
+The frontend is built with Next.js and uses Next.js's experimental HTTPS mode so camera and QR scanner permissions work seamlessly over the local network.
 
+1. Open a new terminal window and navigate to the `frontend` directory:
+   ```bash
+   cd frontend
+   ```
 
-Create your local environment file:
+2. Create your local environment configuration:
+   ```bash
+   # Linux / macOS / Git Bash
+   cp .env.example .env.local
 
-# Linux / macOS / Git Bash
-cp .env.example .env
+   # Windows (CMD)
+   copy .env.example .env.local
+   ```
 
-# Windows (CMD)
-copy .env.example .env
+3. Set your backend URL in `.env.local`:
+   ```env
+   NEXT_PUBLIC_API_URL=https://192.168.254.156:4000
+   ```
 
+4. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Configure your .env settings:
+5. Start the development server with automatic HTTPS certificate setup:
+   ```bash
+   npm run dev:https
+   ```
+   > **Note:** Next.js will automatically download and create local certificates via `mkcert`. No manual OpenSSL key generation commands are required!
 
-PORT=4000
-NODE_ENV=development
-CORS_ORIGIN=https://192.168.254.156:3000
-QR_SECRET=your_qr_hmac_secret_key
-JWT_SECRET=your_admin_jwt_secret_key
+6. Open **`https://localhost:3000`** (or `https://192.168.254.156:3000`) in your browser.
 
-# Database Credentials
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_USERNAME=root
-DB_PASSWORD=your_password
-DB_DATABASE=smart_trash_bin
+---
 
+## ⚠️ Accepting Local Certificates
 
-Install dependencies and start the backend development server:
+When accessing the app over local network IP addresses (`https://192.168.254.156:3000`), your browser will show a standard local SSL notice on first visit.
 
-npm install
-npm run dev
+1. Open `https://192.168.254.156:3000` or `https://localhost:3000`.
+2. Click **Advanced** -> **Proceed to site (unsafe)** to grant the browser access to local network hardware APIs.
 
+---
 
-🖥️ Step 3: Frontend Setup
+## 📁 Repository Structure
 
-The frontend is a Next.js web application.
+```
+Smart_Trash_Bin/
+├── backend/                  # Express.js REST API
+│   ├── config/               # Database and environment configurations
+│   ├── middleware/           # Auth, error handling, session validation
+│   ├── routes/               # Routes (/deposit, /qr, /session, /admin)
+│   ├── services/             # MySQL store and business logic
+│   └── app.js                # Express app entry
+├── frontend/                 # Next.js Kiosk & Admin Dashboard
+│   ├── app/                  # App Router pages (/admin, /kiosk)
+│   ├── components/           # Kiosk UI, terminal views, and admin panels
+│   ├── hooks/                # Custom hooks (kiosk session, scanner)
+│   └── lib/                  # Resolver utilities and API fetchers
+└── README.md
+```
 
-Open a new terminal window and navigate to the frontend directory:
+---
 
-cd frontend
+## 🛠️ Production Deployment
 
+For production deployments:
 
-Create your local environment configuration:
-
-# Linux / macOS / Git Bash
-cp .env.example .env.local
-
-# Windows (CMD)
-copy .env.example .env.local
-
-
-Update .env.local to point to your secure backend API URL:
-
-NEXT_PUBLIC_API_URL=https://192.168.254.156:4000
-
-
-Install dependencies and start the development server:
-
-npm install
-npm run dev
-
-
-Wait for the server to compile, then open https://localhost:3000 (or https://192.168.254.156:3000) in your browser.
-
-⚠️ Step 4: Accepting Self-Signed Certificates
-
-When using self-signed HTTPS certificates on a local network, modern browsers will initially display a security warning ("Your connection is not private").
-
-To authorize local requests:
-
-Visit `https://192.168.
+- **Backend:** Run `npm start` inside the `backend` folder.
+- **Frontend:** Build and launch the production Next.js instance:
+  ```bash
+  cd frontend
+  npm run build
+  npm start
+  ```
