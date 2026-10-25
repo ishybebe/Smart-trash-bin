@@ -1,4 +1,11 @@
 node_modules/
 .env
 *.log
+# Exclude database dumps/seeds and tests from version control
+db/
+test/
+
+# Local data directory
 .data/
+!.data/.gitkeep
+
